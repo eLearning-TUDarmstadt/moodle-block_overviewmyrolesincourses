@@ -64,7 +64,9 @@ class block_overviewmyrolesincourses extends block_base {
         global $USER, $OUTPUT;
         $foldonstart = $this->config->foldonstart;
         // 1. Find all courses a user is enrolled.
-        $enroledcourses = enrol_get_my_courses();
+        $enroledcourses = get_config('block_overviewmyrolesincourses', 'defaultskipcoursecapabilitycheck')
+            ? enrol_get_all_users_courses($USER->id)
+            : enrol_get_my_courses();
         $text = '';
         if ($enroledcourses) {
             // 2. Find all roles that the admin has configured as supported roles for this block.
@@ -139,10 +141,6 @@ class block_overviewmyrolesincourses extends block_base {
         $result = [];
         foreach ($enroledcourses as $enroledcourse) {
             $coursecontext = context_course::instance($enroledcourse->id);
-            if ($enroledcourse->visible == 0 && !has_capability('moodle/course:viewhiddencourses', $coursecontext)) {
-                // Only show invisible courses if capability moodle/course:viewhiddencourses on this coursecontext.
-                continue;
-            }
             $showpast = $this->config->showpast;
             $showinprogress = $this->config->showinprogress;
             $showfuture = $this->config->showfuture;
